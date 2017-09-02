@@ -2,17 +2,17 @@
 
 A Simple Java program to illustrate basic MapR FS ACE operations.
 
-Usage
+**Usage:**
 
 Clone this project, then:
 
-mvn clean install
+```mvn clean install
 java -cp $(hadoop classpath):target/maprfs-ace-sample-0.0.1-SNAPSHOT.jar com.mapr.MapRAceTest
-
+```
 You should see output like:
 
-
-Using path /tmp/ace_test_file for Ace Testing.
+```
+Creating path /tmp/ace_test_file for Ace Testing.
 
 Ace for path:/tmp/ace_test_file has been set successfully!
 
@@ -27,3 +27,4 @@ Current Ace values for path - /tmp/ace_test_file
 AccessType:READFILE :
 AccessType:WRITEFILE :
 AccessType:EXECUTEFILE :
+```
