@@ -13,7 +13,7 @@ import org.apache.hadoop.fs.Path;
 import com.mapr.fs.MapRFileAce;
 import com.mapr.fs.MapRFileSystem;
 
-public class MapRAceTest {
+public class MapRAceDemo {
 
 	public static final String MAPRFS_URI = "maprfs:///";
 

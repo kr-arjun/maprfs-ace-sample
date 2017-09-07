@@ -7,7 +7,7 @@ A Simple Java program to illustrate basic MapR FS ACE operations.
 Clone this project, then:
 
 ```mvn clean install
-java -cp $(hadoop classpath):target/maprfs-ace-sample-0.0.1-SNAPSHOT.jar com.mapr.MapRAceTest
+java -cp $(hadoop classpath):target/maprfs-ace-sample-0.0.1-SNAPSHOT.jar com.mapr.MapRAceDemo
 ```
 You should see output like:
 
@@ -28,3 +28,4 @@ AccessType:READFILE :
 AccessType:WRITEFILE :
 AccessType:EXECUTEFILE :
 ```
+
