@@ -22,6 +22,7 @@ import org.apache.hadoop.fs.Path;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.ByteString;
 import com.mapr.fs.AceHelper;
+import com.mapr.fs.FileAceEntry;
 import com.mapr.fs.MapRFileAce;
 import com.mapr.fs.MapRFileSystem;
 import com.mapr.fs.proto.Common.FSAccessType;
@@ -30,14 +31,24 @@ import com.mapr.fs.proto.Common.FileACE;
 public class MapRAceClient {
 
 	public static final Map<MultiAceType, FSAccessType> aceTypeMapping = new ImmutableMap.Builder<MultiAceType, FSAccessType>()
-			.put(MultiAceType.FILEREAD_ACCESS, FSAccessType.AceRead)
-			.put(MultiAceType.FILEWRITE_ACCESS, FSAccessType.AceWrite)
-			.put(MultiAceType.FILEEXECUTE_ACCESS, FSAccessType.AceExecute)
-			.put(MultiAceType.READDIR_ACCESS, FSAccessType.AceReadDir)
-			.put(MultiAceType.ADDCHILD_ACCESS, FSAccessType.AceAddChild)
-			.put(MultiAceType.DELETECHILD_ACCESS, FSAccessType.AceDeleteChild)
-			.put(MultiAceType.LOOKUPDIR_ACCESS, FSAccessType.AceLookupDir).build();
+			.put(MultiAceType.FILEREAD, FSAccessType.AceRead)
+			.put(MultiAceType.FILEWRITE, FSAccessType.AceWrite)
+			.put(MultiAceType.FILEEXECUTE, FSAccessType.AceExecute)
+			.put(MultiAceType.READDIR, FSAccessType.AceReadDir)
+			.put(MultiAceType.ADDCHILD, FSAccessType.AceAddChild)
+			.put(MultiAceType.DELETECHILD, FSAccessType.AceDeleteChild)
+			.put(MultiAceType.LOOKUPDIR, FSAccessType.AceLookupDir).build();
 
+	public static final Map<FSAccessType, MultiAceType> aceTypeReverseMapping = new ImmutableMap.Builder<FSAccessType, MultiAceType>()
+			.put(FSAccessType.AceRead,MultiAceType.FILEREAD)
+			.put(FSAccessType.AceWrite,MultiAceType.FILEWRITE)
+			.put(FSAccessType.AceExecute,MultiAceType.FILEEXECUTE)
+			.put(FSAccessType.AceReadDir,MultiAceType.READDIR )
+			.put(FSAccessType.AceAddChild,MultiAceType.ADDCHILD)
+			.put(FSAccessType.AceDeleteChild,MultiAceType.DELETECHILD)
+			.put(FSAccessType.AceLookupDir,MultiAceType.LOOKUPDIR).build();
+	
+	
 	private FileSystem fs;
 
 	public MapRAceClient(String maprFsURI) throws IOException {
@@ -48,13 +59,14 @@ public class MapRAceClient {
 
 	/**
 	 * Setting MapR FS object
+	 * 
 	 * @param maprFsURI
 	 * @throws IOException
 	 */
 	private void setFS(String maprFsURI) throws IOException {
 
 		Configuration conf = new Configuration();
-		conf.set("fs.default.name", maprFsURI);
+		conf.set("fs.defaultFS", maprFsURI);
 		conf.set("fs.maprfs.impl", "com.mapr.fs.MapRFileSystem");
 
 		fs = FileSystem.get(URI.create(maprFsURI), conf);
@@ -80,10 +92,12 @@ public class MapRAceClient {
 		Option aceExpr = new Option("aceExpr", "aceExpr", true, "Ace Expression");
 		options.addOption(aceExpr);
 
-		Option setInherit = new Option("setInherit", "setInherit", true, "Enable set Inherit value for sub directories :<true/false>");
+		Option setInherit = new Option("setInherit", "setInherit", true,
+				"Enable set Inherit value for sub directories :<true/false>");
 		options.addOption(setInherit);
 
-		Option preserveModeBits = new Option("preserveModeBits", "preserveModeBits", true, "Enable preserve Mode bits : <true/false>");
+		Option preserveModeBits = new Option("preserveModeBits", "preserveModeBits", true,
+				"Enable preserve Mode bits : <true/false>");
 		options.addOption(preserveModeBits);
 
 		Option recursive = new Option("recursive", "recursive", true, "set Ace recursively : <true/false>");
@@ -105,6 +119,8 @@ public class MapRAceClient {
 			if (!aceClient.isPathExists(new Path(pathStr))) {
 
 				System.err.println("Invalid path !!" + pathStr);
+				formatter.printHelp("MapRAceClient", options);
+				System.exit(1);
 
 			}
 
@@ -126,11 +142,11 @@ public class MapRAceClient {
 
 				aceClient.getAce(pathStr);
 
-			}else {
-				
+			} else {
+
 				System.err.println("Invalid ace operations!");
 				formatter.printHelp("MapRAceClient", options);
-				
+
 			}
 
 		} catch (ParseException exp) {
@@ -142,6 +158,14 @@ public class MapRAceClient {
 
 	}
 
+	/**
+	 * Validate set ace options.
+	 * @param aceExpr
+	 * @param preserveModeBitsStr
+	 * @param setInheritStr
+	 * @param recursiveStr
+	 * @return
+	 */
 	private boolean validateAceOptions(String aceExpr, String preserveModeBitsStr, String setInheritStr,
 			String recursiveStr) {
 
@@ -174,28 +198,61 @@ public class MapRAceClient {
 
 	}
 
+	/**
+	 * Get Ace function lists ace attributes
+	 * 
+	 * @param pathStr
+	 * @throws IOException
+	 */
 	private void getAce(String pathStr) throws IOException {
 
 		Path path = new Path(pathStr);
 
-		List<MapRFileAce> aceList = ((MapRFileSystem) fs).getAces(path);
+		ArrayList<FileAceEntry> acesList = ((MapRFileSystem) fs).getAces(path, false);
+
 		System.out.println("\nAce settings for path - " + pathStr);
+		FileAceEntry fileAceEntry = acesList.get(0);
+		for (FileACE ace : fileAceEntry.aces) {
 
-		for (MapRFileAce aceValue : aceList) {
+			System.out.println(aceTypeReverseMapping.get(ace.getAccessType()).name().toLowerCase()+ ": " + AceHelper.toInfix(ace.getBoolExp().toStringUtf8()));
+		}
+		if (fs.isDirectory(path)) {
 
-			System.out.println(aceValue.getAccessType().name().toLowerCase() + " : " + aceValue.getBooleanExpression());
+			System.out.println("inherit: " + fileAceEntry.inherit);
+			System.out.println("mode: " + fileAceEntry.permission);
+
 		}
 
 	}
 
+	/**
+	 * To delete ace set for a path
+	 * @param pathStr
+	 * @throws IOException
+	 */
 	private void delAce(String pathStr) throws IOException {
 
 		Path path = new Path(pathStr);
 
 		((MapRFileSystem) fs).deleteAces(path);
+		
+		System.out.println("\nAce for path:" + pathStr + " has been deleted successfully!");
+
 
 	}
 
+	/**
+	 *
+	 * To set ACE for path.
+	 * 
+	 * @param operation
+	 * @param pathStr
+	 * @param aceExpression
+	 * @param preserveModeBitsStr
+	 * @param setInheritStr
+	 * @param recursiveStr
+	 * @throws IOException
+	 */
 	private void setAce(String operation, String pathStr, String aceExpression, String preserveModeBitsStr,
 			String setInheritStr, String recursiveStr) throws IOException {
 
@@ -235,6 +292,12 @@ public class MapRAceClient {
 		return fs.exists(path);
 	}
 
+	/**
+	 * Parse multi ace option and convert it to array list of corresponding FileACE object.
+	 * @param multiAceStr
+	 * @return
+	 * @throws IOException
+	 */
 	private ArrayList<FileACE> parseAceOptions(String multiAceStr) throws IOException {
 
 		ArrayList<FileACE> faces = new ArrayList<FileACE>();
@@ -256,6 +319,11 @@ public class MapRAceClient {
 
 	}
 
+	/**
+	 * Return FSAccessType for given multi ace option.
+	 * @param aceType
+	 * @return
+	 */
 	private FSAccessType getAccessTypeMapping(String aceType) {
 
 		return aceTypeMapping.get(MultiAceType.get(aceType));

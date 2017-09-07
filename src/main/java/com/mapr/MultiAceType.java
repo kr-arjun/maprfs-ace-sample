@@ -6,13 +6,13 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public enum MultiAceType {
 
-	FILEREAD_ACCESS("rf"), 
-	FILEWRITE_ACCESS("wf"), 
-	FILEEXECUTE_ACCESS("ef"), 
-	READDIR_ACCESS("rd"),
-	ADDCHILD_ACCESS("ac"),
-	DELETECHILD_ACCESS("dc"),
-	LOOKUPDIR_ACCESS("ld");
+	FILEREAD("rf"), 
+	FILEWRITE("wf"), 
+	FILEEXECUTE("ef"), 
+	READDIR("rd"),
+	ADDCHILD("ac"),
+	DELETECHILD("dc"),
+	LOOKUPDIR("ld");
 	
 	
 
