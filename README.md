@@ -39,7 +39,7 @@ AccessType:READFILE :
 AccessType:WRITEFILE :
 AccessType:EXECUTEFILE :
 ```
-##### 2) MapR Ace Client:
+#### 2) MapR Ace Client:
 
 Simple Ace client program to do Ace operations on path passed as argument.
 
@@ -51,23 +51,27 @@ Set Ace operation:
 ```
 java -cp $(hadoop classpath):maprfs-ace-sample-0.0.1-SNAPSHOT.jar com.mapr.MapRAceClient \
 -maprfsuri maprfs:/// -aceOp setace -path <path> -aceExpr <ace expression> \
---preserveModeBits <true/false> -setInherit <true/false> -recursive <true/false>
+-preserveModeBits <true/false> -setInherit <true/false> -recursive <true/false>
 ```
 Get Ace operation
 
 ```
-java -cp $(hadoop classpath):maprfs-ace-sample-0.0.1-SNAPSHOT.jar com.mapr.MapRAceClient -maprfsuri maprfs:/// -aceOp getace -path <path>
+java -cp $(hadoop classpath):maprfs-ace-sample-0.0.1-SNAPSHOT.jar com.mapr.MapRAceClient \
+-maprfsuri maprfs:/// -aceOp getace -path <path>
 ```
 
 Delete Ace operation:
 
 ```
-java -cp $(hadoop classpath):maprfs-ace-sample-0.0.1-SNAPSHOT.jar com.mapr.MapRAceClient -maprfsuri maprfs:/// -aceOp delace -path <path>
+java -cp $(hadoop classpath):maprfs-ace-sample-0.0.1-SNAPSHOT.jar com.mapr.MapRAceClient \
+-maprfsuri maprfs:/// -aceOp delace -path <path>
 ```
 ##### Sample:
 
 ```
-$ java -cp $(hadoop classpath):maprfs-ace-sample-0.0.1-SNAPSHOT.jar com.mapr.MapRAceClient -maprfsuri maprfs:/// -aceOp setace -path /tmp/ace_test_dir -aceExpr "rf:u:mapr|u:root,wf:u:mapr|u:arjun,ac:u:mapr|u:arjun,dc:u:mapr|u:arjun,ld:u:mapr|u:arjun,rd:u:mapr|u:arjun" --preserveModeBits true -setInherit true -recursive true
+$ java -cp $(hadoop classpath):maprfs-ace-sample-0.0.1-SNAPSHOT.jar com.mapr.MapRAceClient \
+-maprfsuri maprfs:/// -aceOp setace -path /tmp/ace_test_dir -aceExpr "rf:u:mapr|u:root,wf:u:mapr|u:arjun,ac:u:mapr|u:arjun,dc:u:mapr|u:arjun,ld:u:mapr|u:arjun,rd:u:mapr|u:arjun" 
+-preserveModeBits true -setInherit true -recursive true
 
 
 Ace for path:/tmp/ace_test_dir has been set successfully! status :0
@@ -83,7 +87,8 @@ lookupdir : u:mapr | u:arjun
 $
 
 
-$java -cp $(hadoop classpath):maprfs-ace-sample-0.0.1-SNAPSHOT.jar com.mapr.MapRAceClient -maprfsuri maprfs:/// -aceOp getace -path /tmp/ace_test_dir
+$java -cp $(hadoop classpath):maprfs-ace-sample-0.0.1-SNAPSHOT.jar com.mapr.MapRAceClient \
+-maprfsuri maprfs:/// -aceOp getace -path /tmp/ace_test_dir
 17/09/06 22:25:40 WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
 
 Ace settings for path - /tmp/ace_test_dir
